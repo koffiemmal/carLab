@@ -13,9 +13,6 @@ export default defineNuxtConfig({
       apiBase: '/api'
     }
   },
-  nitro: {
-    preset: process.env.NITRO_PRESET || 'vercel'
-  },
   app: {
     head: {
       title: 'CarLab - Gestion de Réservations',
