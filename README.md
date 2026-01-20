@@ -4,6 +4,9 @@ Application full-stack développée pour la gestion de réservations de véhicul
 
 ## 📋 Table des matières
 
+- [Contexte de l'application](#contexte-de-lapplication)
+- [Choix techniques effectués](#choix-techniques-effectués)
+- [Principales fonctionnalités implémentées](#principales-fonctionnalités-implémentées)
 - [Aperçu](#aperçu)
 - [Fonctionnalités](#fonctionnalités)
 - [Technologies utilisées](#technologies-utilisées)
@@ -14,6 +17,192 @@ Application full-stack développée pour la gestion de réservations de véhicul
 - [API](#api)
 - [Sécurité](#sécurité)
 - [Design](#design)
+
+## 📖 Contexte de l'application
+
+### Origine du projet
+
+CarLab a été développé dans le cadre d'un test pratique pour le recrutement de stagiaire développeur full-stack au **Togo Data Lab**. L'objectif était de créer une application complète permettant aux employés d'une organisation de réserver des véhicules pour leurs déplacements professionnels.
+
+### Problématique
+
+Les organisations disposant d'un parc de véhicules ont besoin d'un système pour :
+- Gérer les réservations de véhicules de manière centralisée
+- Éviter les conflits et les chevauchements de réservations
+- Faciliter la gestion administrative du parc automobile
+- Offrir une expérience utilisateur moderne et intuitive
+
+### Objectifs
+
+CarLab répond à ces besoins en proposant :
+- Une interface web moderne et responsive
+- Un système de réservation avec validation automatique des conflits
+- Un panneau d'administration complet
+- Une fonctionnalité de recommandation intelligente basée sur l'IA
+
+### Public cible
+
+- **Employés** : Pour réserver des véhicules pour leurs déplacements professionnels
+- **Administrateurs** : Pour gérer le parc de véhicules et superviser les réservations
+
+## 🛠️ Choix techniques effectués
+
+### Architecture Full-Stack avec Nuxt.js 3
+
+**Choix** : Nuxt.js 3 comme framework principal
+
+**Justification** :
+- **Unification frontend/backend** : Nuxt.js permet de développer le frontend et le backend dans un même projet, simplifiant la structure et le déploiement
+- **Server-Side Rendering (SSR)** : Améliore les performances et le SEO
+- **API Routes intégrées** : Pas besoin d'un serveur backend séparé, les routes API sont directement dans le projet
+- **TypeScript/JavaScript** : Support natif, développement rapide
+- **Écosystème Vue.js** : Framework moderne et performant avec une grande communauté
+
+### Base de données : MongoDB avec Mongoose
+
+**Choix** : MongoDB (NoSQL) avec Mongoose comme ODM
+
+**Justification** :
+- **Flexibilité du schéma** : Permet d'ajouter facilement de nouveaux champs sans migrations complexes
+- **Document-oriented** : Structure de données naturelle pour les réservations et véhicules
+- **Scalabilité** : MongoDB est conçu pour la scalabilité horizontale
+- **Mongoose** : Fournit un schéma, validation et méthodes utiles tout en gardant la flexibilité de MongoDB
+- **MongoDB Atlas** : Solution cloud facile à déployer et maintenir
+
+### Authentification : JWT (JSON Web Tokens)
+
+**Choix** : JWT pour l'authentification
+
+**Justification** :
+- **Stateless** : Pas besoin de stocker les sessions côté serveur
+- **Scalable** : Fonctionne bien avec plusieurs serveurs
+- **Sécurisé** : Tokens signés et optionnellement chiffrés
+- **Standard** : Protocole largement adopté et bien documenté
+- **Cookies httpOnly** : Protection contre les attaques XSS
+
+### Styling : Tailwind CSS
+
+**Choix** : Tailwind CSS pour le styling
+
+**Justification** :
+- **Utility-first** : Développement rapide sans écrire de CSS personnalisé
+- **Responsive** : Classes intégrées pour le responsive design
+- **Personnalisable** : Configuration facile via `tailwind.config.js`
+- **Performance** : Purge automatique du CSS non utilisé
+- **Moderne** : Framework très populaire et maintenu activement
+
+### State Management : Pinia
+
+**Choix** : Pinia pour la gestion d'état
+
+**Justification** :
+- **Successeur de Vuex** : Recommandé par l'équipe Vue.js
+- **TypeScript-friendly** : Meilleure intégration TypeScript
+- **Plus simple** : API plus intuitive que Vuex
+- **DevTools** : Support natif des Vue DevTools
+- **Modulaire** : Stores séparés par domaine (auth, vehicles, reservations)
+
+### Sécurité : bcryptjs pour le hachage
+
+**Choix** : bcryptjs pour le hachage des mots de passe
+
+**Justification** :
+- **Sécurité** : Algorithme de hachage robuste et éprouvé
+- **Salt automatique** : Protection contre les rainbow tables
+- **Configurable** : Nombre de rounds ajustable selon les besoins de sécurité
+- **Standard** : Solution standard de l'industrie
+
+### Recommandations IA : Google Gemini
+
+**Choix** : Google Gemini AI pour les recommandations
+
+**Justification** :
+- **Puissance** : Modèle de langage avancé pour comprendre les besoins
+- **API simple** : Intégration facile via API REST
+- **Gratuit** : Plan gratuit disponible pour le développement
+- **Flexible** : Peut analyser des descriptions textuelles complexes
+
+### Autres choix techniques
+
+- **date-fns** : Manipulation moderne des dates (alternative à Moment.js)
+- **Architecture modulaire** : Séparation claire entre composants, pages, stores, API
+- **Middleware** : Protection des routes avec authentification et autorisation
+- **Validation côté serveur** : Toutes les données validées avant traitement
+
+## ✨ Principales fonctionnalités implémentées
+
+### Priorité 1 : Fonctionnalités obligatoires ✅
+
+#### 1. Système d'authentification complet
+- **Inscription** : Création de compte avec validation des données
+- **Connexion** : Authentification sécurisée avec JWT
+- **Gestion de session** : Persistance de l'authentification
+- **Déconnexion** : Nettoyage de la session
+- **Protection des routes** : Middleware pour protéger les pages nécessitant une authentification
+
+#### 2. Gestion des véhicules
+- **Liste des véhicules** : Affichage de tous les véhicules avec pagination
+- **Détails complets** : Informations détaillées (marque, modèle, année, type, etc.)
+- **Recherche et filtres** : Filtrage par type, marque, couleur, disponibilité
+- **Upload d'images** : Gestion des images pour chaque véhicule
+- **Gestion administrative** : CRUD complet pour les administrateurs
+
+#### 3. Création de réservations
+- **Formulaire complet** : Dates, heures, lieux de prise en charge/retour
+- **Validation des dates** : Vérification de cohérence (début < fin, pas de passé)
+- **Raison de réservation** : Champ pour documenter le besoin
+- **Interface intuitive** : Modal et page dédiée pour la réservation
+
+#### 4. Validation des conflits de réservation
+- **Détection automatique** : Vérification des chevauchements de périodes
+- **Prévention des doubles réservations** : Un véhicule ne peut pas être réservé deux fois sur la même période
+- **Vérification en temps réel** : API pour vérifier la disponibilité avant réservation
+- **Messages d'erreur clairs** : Feedback utilisateur en cas de conflit
+
+### Priorité 2 : Fonctionnalités recommandées ✅
+
+#### 5. Liste des réservations utilisateur
+- **Vue d'ensemble** : Toutes les réservations de l'utilisateur connecté
+- **Filtrage par statut** : pending, confirmed, active, completed, cancelled
+- **Détails complets** : Informations détaillées de chaque réservation
+- **Cartes visuelles** : Interface moderne avec cartes de réservation
+
+#### 6. Modification et annulation de réservations
+- **Modification** : Mise à jour des dates, heures, lieux
+- **Annulation** : Annulation avec confirmation
+- **Validation** : Vérification des conflits lors de la modification
+- **Mise à jour en temps réel** : Synchronisation immédiate des changements
+
+#### 7. Filtrage avancé des véhicules
+- **Recherche par dates** : Trouver les véhicules disponibles pour une période
+- **Filtres multiples** : Type, marque, couleur, nombre de places
+- **Recherche textuelle** : Recherche dans les marques, modèles, types
+- **API dédiée** : Endpoint `/api/vehicles/available` pour la disponibilité
+
+### Priorité 3 : Fonctionnalités bonus ✅
+
+#### 8. Gestion des rôles (admin/utilisateur)
+- **Système de rôles** : Distinction entre utilisateurs et administrateurs
+- **Panneau d'administration** : Interface dédiée pour les admins
+- **Permissions différenciées** : Accès restreint selon le rôle
+- **Middleware d'autorisation** : Protection des routes admin
+
+#### 9. Historique des réservations
+- **Statuts multiples** : Gestion complète du cycle de vie des réservations
+- **Historique accessible** : Consultation de toutes les réservations passées
+- **Filtrage par statut** : Navigation facile dans l'historique
+
+#### 10. Recommandation IA
+- **Analyse intelligente** : Utilisation de Google Gemini AI
+- **Suggestions personnalisées** : Recommandations basées sur la destination et la description
+- **Scores de pertinence** : Chaque recommandation inclut un score
+- **Explications détaillées** : Raisons de chaque recommandation
+
+#### 11. Upload et gestion d'images
+- **Upload depuis PC** : Sélection de fichiers locaux
+- **Aperçu en temps réel** : Visualisation avant upload
+- **Validation** : Vérification du type et de la taille
+- **Stockage** : Gestion des images dans `public/uploads/vehicles/`
 
 ## 🎯 Aperçu
 
@@ -370,29 +559,7 @@ Assurez-vous de configurer :
 - `JWT_SECRET` : Secret JWT fort et unique
 - `NODE_ENV=production`
 
-### Recommandations
 
-- Utiliser HTTPS
-- Configurer un reverse proxy (Nginx)
-- Mettre en place un monitoring
-- Configurer des sauvegardes MongoDB régulières
-- Implémenter un rate limiting
-
-## 🤝 Contribution
-
-Ce projet a été développé dans le cadre d'un test pratique. Pour toute question ou amélioration :
-
-1. Ouvrir une issue pour discuter des changements
-2. Créer une branche pour votre fonctionnalité
-3. Soumettre une pull request
-
-## 📄 Licence
-
-Ce projet est développé pour le Togo Data Lab dans le cadre d'un processus de recrutement.
-
-## 👨‍💻 Auteur
-
-Développé avec ❤️ pour le Togo Data Lab
 
 ---
 
