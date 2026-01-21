@@ -99,6 +99,28 @@ export const useReservationStore = defineStore('reservations', {
       } finally {
         this.loading = false
       }
+    },
+
+    async updateReservationStatus(id, status) {
+      this.loading = true
+      try {
+        const response = await $fetch(`/api/reservations/${id}`, {
+          method: 'PATCH',
+          body: { status }
+        })
+
+        const index = this.reservations.findIndex(r => r._id === id)
+        if (index !== -1) {
+          this.reservations[index] = response.reservation
+        }
+
+        return response.reservation
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut de la réservation:', error)
+        throw error
+      } finally {
+        this.loading = false
+      }
     }
   }
 })

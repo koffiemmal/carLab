@@ -53,11 +53,28 @@
     </div>
 
     <div class="flex justify-end space-x-3">
+      <template v-if="isAdmin && reservation.status === 'pending'">
+        <button
+          @click="handleValidate"
+          class="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md text-sm"
+          :disabled="updatingStatus"
+        >
+          {{ updatingStatus ? 'Validation...' : 'Valider' }}
+        </button>
+        <button
+          @click="handleReject"
+          class="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md text-sm"
+          :disabled="updatingStatus"
+        >
+          Refuser
+        </button>
+      </template>
+
       <button
         v-if="canCancel"
         @click="handleCancel"
         class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md"
-        :disabled="cancelling"
+        :disabled="cancelling || updatingStatus"
       >
         {{ cancelling ? 'Annulation...' : 'Annuler' }}
       </button>
@@ -73,6 +90,7 @@
 
 <script setup>
 import { useReservationStore } from '~/stores/reservations'
+import { useAuthStore } from '~/stores/auth'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -86,7 +104,12 @@ const props = defineProps({
 const emit = defineEmits(['refresh'])
 
 const reservationStore = useReservationStore()
+const authStore = useAuthStore()
+
 const cancelling = ref(false)
+const updatingStatus = ref(false)
+
+const isAdmin = computed(() => authStore.isAdmin)
 
 const statusLabels = {
   pending: 'En attente',
@@ -126,6 +149,34 @@ const handleCancel = async () => {
     alert(error.data?.message || 'Erreur lors de l\'annulation')
   } finally {
     cancelling.value = false
+  }
+}
+
+const handleValidate = async () => {
+  updatingStatus.value = true
+  try {
+    await reservationStore.updateReservationStatus(props.reservation._id, 'confirmed')
+    emit('refresh')
+  } catch (error) {
+    alert(error.data?.message || 'Erreur lors de la validation de la réservation')
+  } finally {
+    updatingStatus.value = false
+  }
+}
+
+const handleReject = async () => {
+  if (!confirm('Refuser cette réservation ?')) {
+    return
+  }
+
+  updatingStatus.value = true
+  try {
+    await reservationStore.updateReservationStatus(props.reservation._id, 'cancelled')
+    emit('refresh')
+  } catch (error) {
+    alert(error.data?.message || 'Erreur lors du refus de la réservation')
+  } finally {
+    updatingStatus.value = false
   }
 }
 </script>

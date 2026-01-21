@@ -13,8 +13,8 @@
       </div>
 
       <div v-else-if="vehicle" class="grid lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2">
-          <div class="card p-8 mb-6">
+        <div class="lg:col-span-2 space-y-6">
+          <div class="card p-8">
             <div class="flex items-start justify-between mb-6">
               <div>
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">
@@ -52,7 +52,7 @@
               <img v-else :src="vehicle.image" :alt="vehicle.brand" class="w-full h-full object-cover rounded-2xl" />
             </div>
 
-            <div>
+            <div class="mt-6">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Caractéristiques du véhicule</h3>
               <div class="grid md:grid-cols-3 gap-6">
                 <div>
@@ -80,6 +80,32 @@
                   </ul>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Calendrier des disponibilités -->
+          <div class="card p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Calendrier des disponibilités</h2>
+            <p class="text-sm text-gray-500 mb-4">
+              Les jours en <span class="font-semibold text-red-600">rouge</span> sont déjà réservés (en attente, confirmés ou actifs).
+            </p>
+            <div class="grid grid-cols-7 gap-2 text-center text-xs text-gray-500 mb-2">
+              <span v-for="d in ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim']" :key="d">{{ d }}</span>
+            </div>
+            <div class="grid grid-cols-7 gap-2 text-sm">
+              <span
+                v-for="(day, index) in calendarDays"
+                :key="index"
+                class="h-9 flex items-center justify-center rounded-lg"
+                :class="[
+                  !day ? '' :
+                  day.isBusy
+                    ? 'bg-red-100 text-red-700 border border-red-200'
+                    : 'bg-green-50 text-green-700 border border-green-200'
+                ]"
+              >
+                <span v-if="day">{{ day.date }}</span>
+              </span>
             </div>
           </div>
         </div>
@@ -249,6 +275,7 @@ const vehicle = ref(null)
 const loading = ref(true)
 const submitting = ref(false)
 const error = ref('')
+const vehicleReservations = ref([])
 
 const minDate = new Date().toISOString().split('T')[0]
 
@@ -263,14 +290,67 @@ const form = reactive({
   notes: ''
 })
 
-onMounted(async () => {
+const loadVehicleAndReservations = async () => {
   try {
     vehicle.value = await vehicleStore.fetchVehicle(route.params.id)
+
+    const response = await $fetch(`/api/vehicles/${route.params.id}/reservations`)
+    vehicleReservations.value = response.reservations || []
   } catch (err) {
-    error.value = err.data?.message || 'Erreur lors du chargement du véhicule'
+    console.error('Erreur chargement véhicule/réservations:', err)
+    error.value = err.data?.message || err.message || 'Erreur lors du chargement du véhicule'
   } finally {
     loading.value = false
   }
+}
+
+onMounted(async () => {
+  await loadVehicleAndReservations()
+})
+
+// Génère les jours du mois courant avec indication des jours réservés
+const calendarDays = computed(() => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth() // 0-11
+
+  const firstDay = new Date(year, month, 1)
+  const firstWeekday = (firstDay.getDay() + 6) % 7 // 0 = lundi
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  // Construire un Set de dates réservées (yyyy-mm-dd)
+  const busy = new Set()
+  for (const r of vehicleReservations.value) {
+    const start = new Date(r.startDate)
+    const end = new Date(r.endDate)
+    // normaliser
+    start.setHours(0, 0, 0, 0)
+    end.setHours(0, 0, 0, 0)
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const m = d.getMonth()
+      const y = d.getFullYear()
+      if (m === month && y === year) {
+        busy.add(d.toISOString().split('T')[0])
+      }
+    }
+  }
+
+  const days = []
+  // cases vides avant le premier jour
+  for (let i = 0; i < firstWeekday; i++) {
+    days.push(null)
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateObj = new Date(year, month, d)
+    const iso = dateObj.toISOString().split('T')[0]
+    days.push({
+      date: d,
+      iso,
+      isBusy: busy.has(iso)
+    })
+  }
+
+  return days
 })
 
 const handleReserve = async () => {

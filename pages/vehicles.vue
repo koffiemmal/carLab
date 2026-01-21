@@ -246,6 +246,7 @@
               :vehicle="vehicle"
               :search-form="searchForm"
               @view-details="openVehicleModal"
+              @reserve="openReservationModal"
             />
           </div>
         </main>
@@ -259,6 +260,14 @@
       @close="closeVehicleModal"
       @reserved="handleReservationSuccess"
     />
+
+    <!-- Modal de réservation avec calendrier -->
+    <VehicleReservationModal
+      :is-open="isReservationModalOpen"
+      :vehicle-id="selectedReservationVehicleId"
+      @close="closeReservationModal"
+      @reserved="handleReservationModalSuccess"
+    />
   </div>
 </template>
 
@@ -267,6 +276,7 @@ import { useVehicleStore } from '~/stores/vehicles'
 import { useAuthStore } from '~/stores/auth'
 import { useReservationStore } from '~/stores/reservations'
 import VehicleDetailsModal from '~/components/VehicleDetailsModal.vue'
+import VehicleReservationModal from '~/components/VehicleReservationModal.vue'
 
 definePageMeta({
   middleware: 'auth'
@@ -278,6 +288,8 @@ const authStore = useAuthStore()
 const minDate = new Date().toISOString().split('T')[0]
 const isModalOpen = ref(false)
 const selectedVehicleId = ref(null)
+const isReservationModalOpen = ref(false)
+const selectedReservationVehicleId = ref(null)
 
 const openVehicleModal = (vehicleId) => {
   console.log('🔍 [Vehicles Page] openVehicleModal appelé avec ID:', vehicleId)
@@ -294,6 +306,20 @@ const closeVehicleModal = () => {
 
 const handleReservationSuccess = () => {
   closeVehicleModal()
+}
+
+const openReservationModal = (vehicleId) => {
+  selectedReservationVehicleId.value = vehicleId
+  isReservationModalOpen.value = true
+}
+
+const closeReservationModal = () => {
+  isReservationModalOpen.value = false
+  selectedReservationVehicleId.value = null
+}
+
+const handleReservationModalSuccess = () => {
+  closeReservationModal()
 }
 
 const searchForm = reactive({

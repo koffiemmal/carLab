@@ -71,12 +71,12 @@
           >
             Voir détails
           </button>
-          <NuxtLink
-            :to="`/vehicles/${vehicle._id}/reserve`"
+          <button
+            @click="$emit('reserve', vehicle._id)"
             class="bg-primary-500 hover:bg-primary-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md text-sm whitespace-nowrap"
           >
             Réserver
-          </NuxtLink>
+          </button>
         </div>
       </div>
     </div>
@@ -95,7 +95,7 @@ defineProps({
   }
 })
 
-defineEmits(['view-details'])
+defineEmits(['view-details', 'reserve'])
 
 const getImageUrl = (imagePath) => {
   if (!imagePath) return ''
